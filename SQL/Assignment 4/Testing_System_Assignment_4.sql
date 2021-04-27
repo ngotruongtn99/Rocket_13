@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS Testing_System_Assignment_1;
-CREATE DATABASE Testing_System_Assignment_1;
-USE Testing_System_Assignment_1;
+DROP DATABASE IF EXISTS Testing_System_Assignment_4;
+CREATE DATABASE Testing_System_Assignment_4;
+USE Testing_System_Assignment_4;
 
 DROP TABLE IF EXISTS Department;
 CREATE TABLE Department (
@@ -18,7 +18,7 @@ DROP TABLE IF EXISTS `Account`;
 CREATE TABLE `Account`(
 	AccountID			TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
     Email				VARCHAR(20) NOT NULL UNIQUE KEY,
-    UserName			VARCHAR(20) NOT NULL UNIQUE KEY,
+    UserName			VARCHAR(20) NOT NULL UNIQUE KEY CHECK (LENGTH(UserName) >=6),
     FullName			NVARCHAR(30) NOT NULL,
     DepartmentID		TINYINT UNSIGNED NOT NULL,
     PositionID			TINYINT UNSIGNED NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE `Account`(
 DROP TABLE IF EXISTS `Group`;
 CREATE TABLE `Group`(
 	GroupID				TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    GroupName			VARCHAR(20) NOT NULL UNIQUE KEY,
+    GroupName			VARCHAR(20) NOT NULL UNIQUE KEY CHECK (LENGTH(GroupName) >=8),
     CreatorID			TINYINT UNSIGNED NOT NULL,
     CreateDate			DATETIME DEFAULT NOW(),
     FOREIGN KEY (CreatorID) REFERENCES `Account`(AccountID)
@@ -124,38 +124,38 @@ VALUES
         
 INSERT INTO `Account`(Email, UserName, FullName, DepartmentID, PositionID, CreateDate )
 VALUES
-		('abcxyz1@gmail.com', 'abcxyz1', 'Ban', 1, 2, '2020-03-05'),
-        ('abcxyz2@gmail.com', 'abcxyz2', 'Bna', 1, 2, '2020-03-05'),
+		('abcxyz1@gmail.com', 'abcxyz1', 'Nguyễn Văn A1', 1, 4, '2020-03-05'),
+        ('abcxyz2@gmail.com', 'abcxyz2', 'Nguyễn Văn A2', 1, 3, '2020-03-05'),
         ('abcxyz3@gmail.com', 'abcxyz3', 'Nguyễn Văn A3', 3, 3, '2020-03-07'),
         ('abcxyz4@gmail.com', 'abcxyz4', 'Nguyễn Văn A4', 4, 4, '2020-03-08'),
         ('abcxyz5@gmail.com', 'abcxyz5', 'Nguyễn Văn A5', 5, 2, '2020-03-10'),
-        ('abcxyz6@gmail.com', 'abcxyz6', 'Nguyễn Văn A6', 6, 3, '2020-04-05'),
-        ('abcxyz7@gmail.com', 'abcxyz7', 'Nguyễn Văn A7', 7, 4, NULL		),
+        ('abcxyz6@gmail.com', 'abcxyz6', 'Nguyễn Văn A6', 6, 1, '2020-04-05'),
+        ('abcxyz7@gmail.com', 'abcxyz7', 'Nguyễn Văn A7', 7, 1, NULL		),
         ('abcxyz8@gmail.com', 'abcxyz8', 'Nguyễn Văn A8', 8, 1, '2020-04-07'),
         ('abcxyz9@gmail.com', 'abcxyz9', 'Nguyễn Văn A9', 9, 2, '2020-04-07'),
         ('abcxyz10@gmail.com', 'abcxyz10', 'Nguyễn Văn A10', 10, 2, '2020-04-07');
         
-INSERT INTO `Group`(GroupName, CreatorID)
+INSERT INTO `Group`(GroupName, CreatorID, CreateDate)
 VALUES
-		('abcxy1', 1),
-        ('abcxy2', 2),
-        ('abcxy3', 3),
-        ('abcxy4', 4),
-        ('abcxy5', 5),
-        ('abcxy6', 6),
-        ('abcxy7', 7),
-        ('abcxy8', 8),
-        ('abcxy9', 9);
+		('abcxy123', 1, '2020-12-20'),
+        ('abcxy223', 2, '2018-03-20'),
+        ('abcxy323', 3, '2017-02-20'),
+        ('abcxy423', 4, '2020-04-20'),
+        ('abcxy523', 5, '2020-05-20'),
+        ('abcxy623', 6, '2020-12-20'),
+        ('abcxy723', 7, '2019-12-20'),
+        ('abcxy823', 8, '2020-12-21'),
+        ('abcxy923', 9, '2019-10-20');
         
-INSERT INTO GroupAccount(GroupID, AccountID)
+INSERT INTO GroupAccount(GroupID, AccountID, JoinDate)
 VALUES
-		(1,1),
-		(2,2),
-        (3,3),
-        (4,4),
-        (4,5),
-        (5,6),
-        (7,8);
+		(1,1, '2020-05-20'),
+		(2,2, DEFAULT),
+        (3,3, '2018-03-20'),
+        (4,4, '2020-04-20'),
+        (4,5, '2020-05-20'),
+        (5,6, '2020-12-20'),
+        (7,8, '2020-12-21');
         
 INSERT INTO TypeQuestion(TypeName)
 VALUES 
@@ -170,22 +170,24 @@ VALUES
         ('Postman'),
         ('Ruby');
 
-INSERT INTO Question(Content, CategoryID, TypeID, CreatorID)
+INSERT INTO Question(Content, CategoryID, TypeID, CreatorID, CreateDate)
 VALUES 
-		('Java là gì', 1, 1, 1),
-        ('Java là gì', 1, 2, 2),
-        ('.NET là gì', 2, 1, 1),
-        ('.NET là gì', 2, 2, 3),
-		('SQL là gì', 3, 1, 3),
-        ('SQL là gì', 3, 2, 5),
-        ('Postman là gì', 4, 1, 5),
-        ('Postman là gì', 4, 2, 6),
-        ('Ruby là gì', 5, 1, 7),
-        ('Ruby là gì', 5, 2, 8);
+		('Java là gì', 1, 1, 1, '2020-02-13'),
+        ('Java sử dụng ngôn ngữ gì', 1, 1, 1, '2020-02-15'),
+        ('Java là gì', 1, 2, 2, '2020-02-28'),
+        ('.NET là gì', 2, 1, 1, '2020-02-20'),
+        ('.NET là gì', 2, 2, 3, '2020-07-13'),
+		('SQL là gì', 3, 1, 3, NULL),
+        ('SQL là gì', 3, 2, 5, '2020-05-13'),
+        ('Postman là gì', 4, 1, 5, '2020-06-13'),
+        ('Postman là gì', 4, 2, 6, '2020-02-17'),
+        ('Ruby là gì', 5, 1, 7, '2020-01-20'),
+        ('Ruby là gì', 5, 2, 8, '2020-12-13');
 
 INSERT INTO Answer(Content, QuestionID, isCorrect)
 VALUES
         ('Java là gì', 1, 1),
+        ('Java sử dụng ngôn ngữ gì', 1, 1),
         ('Java là gì', 1, 0),
         ('.NET là gì', 2, 1),
         ('.NET là gì', 2, 0),
@@ -196,23 +198,103 @@ VALUES
         ('Ruby là gì', 5, 1),
         ('Ruby là gì', 5, 0);
         
-INSERT INTO Exam(`Code`, Title, CategoryID, Duration, CreatorID)
+INSERT INTO Exam(`Code`, Title, CategoryID, Duration, CreatorID, CreateDate)
 VALUES
-		('JV1', 'Java', 1, 90, 1),
-        ('.NET1', '.NET', 2, 90, 2),
-        ('SQL1', 'SQL', 3, 90, 3),
-        ('Postman1', 'Postman', 4, 90, 1),
-        ('Ruby1', 'Ruby', 5, 90, 2);
+		('JV1', 'Java', 1, 90, 1, '2020-12-30'),
+        ('.NET1', '.NET', 2, 90, 2, '2020-03-12'),
+        ('SQL1', 'SQL', 3, 90, 3, '2020-09-21'),
+        ('Postman1', 'Postman', 4, 90, 1, '2020-10-23'),
+        ('Ruby1', 'Ruby', 5, 90, 2, '2020-11-09');
         
 INSERT INTO ExamQuestion(ExamID, QuestionID)
 VALUES
         (1,1),
         (1,2),
-        (2,3),
+        (1,3),
         (2,4),
-        (3,5),
+        (2,5),
         (3,6),
-        (4,7),
+        (3,7),
         (4,8),
-        (5,9),
-        (5,10);
+        (4,9),
+        (5,10),
+        (5,11);
+        
+-- Exercise 1: Join
+-- Question 1: Viết lệnh để lấy ra danh sách nhân viên và thông tin phòng ban của họ
+
+SELECT a.AccountID, a.UserName, a.FullName, a.Email, d.DepartmentName FROM `account` a
+INNER JOIN Department d ON a.DepartmentID = d.DepartmentID;
+
+-- Question 2: Viết lệnh để lấy ra thông tin các account được tạo sau ngày 20/12/2010
+
+SELECT * FROM `account` a
+WHERE CreateDate > '2010-12-20 00:00:00 ';
+
+-- Question 3: Viết lệnh để lấy ra tất cả các developer 
+
+SELECT a.AccountID, a.UserName, a.FullName, a.Email 
+FROM `account` a
+INNER JOIN `position` p ON a.PositionID = p.PositionID 
+WHERE p.PositionName = 'Dev';
+
+-- Question 4: Viết lệnh để lấy ra danh sách các phòng ban có >3 nhân viên
+
+SELECT d.DepartmentName, COUNT(a.DepartmentID) AS Soluong 
+FROM `account` a
+INNER JOIN Department d ON a.DepartmentID = d.DepartmentID
+GROUP BY d.DepartmentID 
+HAVING Soluong > 3;
+
+-- Question 5: Viết lệnh để lấy ra danh sách câu hỏi được sử dụng trong đề thi nhiều nhất
+
+SELECT q.Content, COUNT(eq.QuestionID) AS SoLuong 
+FROM Question q
+INNER JOIN ExamQuestion eq ON q.QuestionID = eq.QuestionID
+GROUP BY eq.ExamID
+HAVING MAX(eq.QuestionID);
+
+-- Question 6: Thông kê mỗi category Question được sử dụng trong bao nhiêu Question
+
+SELECT cq.CategoryID, COUNT(QuestionID) AS SoLuong FROM CategoryQuestion cq
+INNER JOIN Question q ON cq.CategoryID = q.CategoryID
+GROUP BY CategoryID;
+
+-- Question 7: Thông kê mỗi Question được sử dụng trong bao nhiêu Exam
+
+SELECT q.QuestionID, COUNT(eq.QuestionID) AS SoLuong 
+FROM Question q
+INNER JOIN ExamQuestion eq ON q.QuestionID = eq.QuestionID
+GROUP BY eq.QuestionID;
+
+-- Question 8: Lấy ra Question có nhiều câu trả lời nhất
+
+SELECT QuestionID, COUNT(AnswerID) FROM Answer
+GROUP BY QuestionID;
+
+-- Question 9: Thống kê số lượng account trong mỗi group
+
+SELECT GroupID, COUNT(AccountID) AS AccInGr FROM GroupAccount
+GROUP BY GroupID;
+
+-- Question 10: Tìm chức vụ có ít người nhất
+
+SELECT p.PositionName, COUNT(p.PositionID) FROM `Account` a
+INNER JOIN `Position` p ON a.PositionID = p.PositionID
+GROUP BY p.PositionID;
+
+-- Question 11: Thống kê mỗi phòng ban có bao nhiêu dev, test, scrum master, PM
+
+SELECT  a.DepartmentID, p.PositionName, COUNT(p.PositionID) FROM `Account` a
+INNER JOIN `Position` p ON a.PositionID = p.PositionID
+GROUP BY a.AccountID;
+
+-- Question 12: Lấy thông tin chi tiết của câu hỏi bao gồm: thông tin cơ bản của 
+--  question, loại câu hỏi, ai là người tạo ra câu hỏi, câu trả lời là gì, …
+
+
+
+
+
+
+
