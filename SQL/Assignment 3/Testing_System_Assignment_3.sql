@@ -17,7 +17,7 @@ CREATE TABLE `Position`(
 DROP TABLE IF EXISTS `Account`;
 CREATE TABLE `Account`(
 	AccountID			TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    Email				VARCHAR(20) NOT NULL UNIQUE KEY,
+    Email				VARCHAR(30) NOT NULL UNIQUE KEY,
     UserName			VARCHAR(20) NOT NULL UNIQUE KEY CHECK (LENGTH(UserName) >=6),
     FullName			NVARCHAR(30) NOT NULL,
     DepartmentID		TINYINT UNSIGNED NOT NULL,
@@ -98,8 +98,8 @@ CREATE TABLE ExamQuestion(
 	ExamID			TINYINT UNSIGNED NOT NULL,	
     QuestionID		TINYINT UNSIGNED NOT NULL,
     PRIMARY KEY (ExamID, QuestionID),
-	FOREIGN KEY (ExamID) 		REFERENCES Exam(ExamID),
-	FOREIGN KEY (QuestionID) 	REFERENCES Question(QuestionID)
+	FOREIGN KEY (ExamID) 		REFERENCES Exam(ExamID) ON DELETE CASCADE,
+	FOREIGN KEY (QuestionID) 	REFERENCES Question(QuestionID)ON DELETE CASCADE
 );
 
 -- Question 1: Thêm ít nhất 10 record vào mỗi table
@@ -235,12 +235,24 @@ SELECT  * FROM `Account`
 WHERE LENGTH(FullName) = (SELECT MAX(length(FullName)) FROM `Account`);
 
 -- Question 5: Lấy ra thông tin account có full name dài nhất và thuộc phòng ban có id = 3
-
+-- Cách 1
 SELECT  * FROM `Account`
 WHERE DepartmentID = 3 
 AND LENGTH(FullName) = (SELECT MAX(length(FullName)) 
                         FROM `Account` 
                         WHERE DepartmentID = 3 );
+
+-- Cách 2
+WITH CTE_GetFullNameMax AS (
+	SELECT MAX(length(FullName)) 
+                        FROM `Account` 
+                        WHERE DepartmentID = 3 
+)
+SELECT  * FROM `Account`
+WHERE DepartmentID = 3 
+AND LENGTH(FullName) = (SELECT * FROM CTE_GetFullNameMax);
+
+
 
 -- Question 6: Lấy ra tên group đã tham gia trước ngày 20/12/2019
 
@@ -273,9 +285,27 @@ HAVING DepartmentID = 2;
 -- Question 11: Lấy ra nhân viên có tên bắt đầu bằng chữ "D" và kết thúc bằng chữ "o"
 
 SELECT * FROM `Account`
-WHERE FullName LIKE 'D%' '%o';
+WHERE FullName LIKE 'D%o';
 
 -- Question 12: Xóa tất cả các exam được tạo trước ngày 20/12/2019
 
+DELETE FROM Exam WHERE CreateDate < '2019-12-20';
 
+-- Question 13: Xóa tất cả các question có nội dung bắt đầu bằng từ "câu hỏi"
+
+DELETE FROM Question WHERE SUBSTRING_INDEX(Content, ' ', 2) = 'câu hỏi';
+
+-- Question 14: Update thông tin của account có id = 5 thành tên "Nguyễn Bá Lộc" và 
+--  email thành loc.nguyenba@vti.com.vn
+
+UPDATE 	`account`
+SET 			FullName = 'Nguyễn Bá Lộc',
+				Email = 'loc.nguyenba@vti.com.vn'
+WHERE 	AccountID = 5;
+
+-- Question 15: update account có id = 5 sẽ thuộc group có id = 4
+
+UPDATE 	GroupAccount
+SET 			GroupID = 4
+WHERE 	AccountID = 5;
 
