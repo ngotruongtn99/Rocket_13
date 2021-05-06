@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS Testing_System_Assignment_4;
-CREATE DATABASE Testing_System_Assignment_4;
-USE Testing_System_Assignment_4;
+DROP DATABASE IF EXISTS Testing_System_Assignment_5;
+CREATE DATABASE Testing_System_Assignment_5;
+USE Testing_System_Assignment_5;
 
 DROP TABLE IF EXISTS Department;
 CREATE TABLE Department (
@@ -23,8 +23,8 @@ CREATE TABLE `Account`(
     DepartmentID		TINYINT UNSIGNED NOT NULL,
     PositionID			TINYINT UNSIGNED NOT NULL,
     CreateDate			DATETIME DEFAULT NOW(),
-    FOREIGN KEY (DepartmentID) 	REFERENCES Department(DepartmentID),
-    FOREIGN KEY (PositionID) 	REFERENCES `Position`(PositionID)
+    FOREIGN KEY (DepartmentID) 	REFERENCES Department(DepartmentID) ON DELETE CASCADE ,
+    FOREIGN KEY (PositionID) 	REFERENCES `Position`(PositionID) ON DELETE CASCADE 
 );
 
 DROP TABLE IF EXISTS `Group`;
@@ -33,7 +33,7 @@ CREATE TABLE `Group`(
     GroupName			VARCHAR(20) NOT NULL UNIQUE KEY CHECK (LENGTH(GroupName) >=8),
     CreatorID			TINYINT UNSIGNED NOT NULL,
     CreateDate			DATETIME DEFAULT NOW(),
-    FOREIGN KEY (CreatorID) REFERENCES `Account`(AccountID)
+    FOREIGN KEY (CreatorID) REFERENCES `Account`(AccountID) ON DELETE CASCADE 
 );
 
 DROP TABLE IF EXISTS GroupAccount;
@@ -42,8 +42,8 @@ CREATE TABLE GroupAccount(
     AccountID			TINYINT UNSIGNED NOT NULL,
     JoinDate			DATETIME DEFAULT NOW(),
     PRIMARY KEY (GroupID, AccountID),
-    FOREIGN KEY (GroupID) REFERENCES `Group`(GroupID),
-    FOREIGN KEY (AccountID) REFERENCES `Account`(AccountID)
+    FOREIGN KEY (GroupID) REFERENCES `Group`(GroupID) ON DELETE CASCADE ,
+    FOREIGN KEY (AccountID) REFERENCES `Account`(AccountID) ON DELETE CASCADE 
 );
 
 DROP TABLE IF EXISTS TypeQuestion;
@@ -66,9 +66,9 @@ CREATE TABLE Question(
     TypeID				TINYINT UNSIGNED NOT NULL,
     CreatorID			TINYINT UNSIGNED NOT NULL,
     CreateDate			DATETIME DEFAULT NOW(),
-    FOREIGN KEY (CategoryID) 	REFERENCES CategoryQuestion(CategoryID),
-    FOREIGN KEY (TypeID) 		REFERENCES TypeQuestion(TypeID),
-    FOREIGN KEY (CreatorID) 	REFERENCES `Account`(AccountID)
+    FOREIGN KEY (CategoryID) 	REFERENCES CategoryQuestion(CategoryID) ON DELETE CASCADE ,
+    FOREIGN KEY (TypeID) 		REFERENCES TypeQuestion(TypeID) ON DELETE CASCADE ,
+    FOREIGN KEY (CreatorID) 	REFERENCES `Account`(AccountID) ON DELETE CASCADE 
 );
 
 DROP TABLE IF EXISTS Answer;
@@ -77,7 +77,7 @@ CREATE TABLE Answer(
 	Content				VARCHAR (100) NOT NULL,
 	QuestionID			TINYINT UNSIGNED NOT NULL,
     isCorrect			BIT DEFAULT 1,
-    FOREIGN KEY (QuestionID) 	REFERENCES Question(QuestionID)
+    FOREIGN KEY (QuestionID) 	REFERENCES Question(QuestionID) ON DELETE CASCADE 
 );
 
 DROP TABLE IF EXISTS Exam;
@@ -89,8 +89,8 @@ CREATE TABLE Exam(
     Duration			TINYINT UNSIGNED NOT NULL,
     CreatorID			TINYINT UNSIGNED NOT NULL,
     CreateDate			DATETIME DEFAULT NOW(),
-	FOREIGN KEY (CategoryID) 	REFERENCES CategoryQuestion(CategoryID),
-    FOREIGN KEY (CreatorID) 	REFERENCES `Account`(AccountID)
+	FOREIGN KEY (CategoryID) 	REFERENCES CategoryQuestion(CategoryID) ON DELETE CASCADE ,
+    FOREIGN KEY (CreatorID) 	REFERENCES `Account`(AccountID) ON DELETE CASCADE 
 );
 
 DROP TABLE IF EXISTS ExamQuestion;
@@ -98,8 +98,8 @@ CREATE TABLE ExamQuestion(
 	ExamID			TINYINT UNSIGNED NOT NULL,	
     QuestionID		TINYINT UNSIGNED NOT NULL,
     PRIMARY KEY (ExamID, QuestionID),
-	FOREIGN KEY (ExamID) 		REFERENCES Exam(ExamID),
-	FOREIGN KEY (QuestionID) 	REFERENCES Question(QuestionID)
+	FOREIGN KEY (ExamID) 		REFERENCES Exam(ExamID) ON DELETE CASCADE ,
+	FOREIGN KEY (QuestionID) 	REFERENCES Question(QuestionID) ON DELETE CASCADE 
 );
 
 INSERT INTO Department(DepartmentName)
@@ -220,164 +220,54 @@ VALUES
         (5,10),
         (5,11);
         
--- Exercise 1: Join
--- Question 1: Viết lệnh để lấy ra danh sách nhân viên và thông tin phòng ban của họ
+-- Question 1: Tạo view có chứa danh sách nhân viên thuộc phòng ban sale        
 
-SELECT A.AccountID, A.UserName, A.FullName, A.Email, D.DepartmentName FROM `account` A
-INNER JOIN Department D ON A.DepartmentID = D.DepartmentID;
-
--- Question 2: Viết lệnh để lấy ra thông tin các account được tạo sau ngày 20/12/2010
-
-SELECT * FROM `account` A
-WHERE CreateDate > '2010-12-20 00:00:00 ';
-
--- Question 3: Viết lệnh để lấy ra tất cả các developer 
-
-SELECT A.AccountID, A.UserName, A.FullName, A.Email 
-FROM `account` A
-INNER JOIN `position` P ON A.PositionID = P.PositionID 
-WHERE P.PositionName = 'Dev';
-
--- Question 4: Viết lệnh để lấy ra danh sách các phòng ban có >3 nhân viên
-
-SELECT D.DepartmentName, COUNT(A.DepartmentID) AS Soluong 
-FROM `account` A
+CREATE OR REPLACE VIEW vw_AccSale AS
+SELECT A.*, D.DepartmentName FROM `account` A
 INNER JOIN Department D ON A.DepartmentID = D.DepartmentID
-GROUP BY D.DepartmentID 
-HAVING Soluong > 3;
+WHERE DepartmentName = 'Sale';
+SELECT * FROM vw_AccSale;
 
--- Question 5: Viết lệnh để lấy ra danh sách câu hỏi được sử dụng trong đề thi nhiều nhất
-
-SELECT 		Q.QuestionID, Q.Content, Q.CategoryID, Q.TypeID, Q.CreatorID, Q.CreateDate, Count(Q.Content) AS 'SO LUONG'
-FROM		Question Q 
-INNER JOIN 	ExamQuestion EQ ON Q.QuestionID = EQ.QuestionID
-GROUP BY	Q.Content
-HAVING		COUNT(Q.Content) = (SELECT	MAX(CountQ)
-								FROM		
-										(SELECT 		Q.Content,COUNT(Q.QuestionID) AS CountQ
-										FROM			ExamQuestion EQ 
-										INNER JOIN 		Question Q ON EQ.QuestionID = Q.QuestionID
-										GROUP BY		Q.Content) AS MaxContent);
-
--- Question 6: Thông kê mỗi category Question được sử dụng trong bao nhiêu Question
-
-SELECT CQ.CategoryID, COUNT(Q.QuestionID) AS SoLuong FROM CategoryQuestion CQ
-INNER JOIN Question Q ON CQ.CategoryID = Q.CategoryID
-GROUP BY CQ.CategoryID;
-
--- Question 7: Thông kê mỗi Question được sử dụng trong bao nhiêu Exam
-
-SELECT q.QuestionID, COUNT(eq.QuestionID) AS SoLuong 
-FROM Question q
-INNER JOIN ExamQuestion eq ON q.QuestionID = eq.QuestionID
-GROUP BY eq.QuestionID;
-
--- Question 8: Lấy ra Question có nhiều câu trả lời nhất
-WITH CTE_QsMaxAs AS (
-	SELECT COUNT(AnswerID) AS SL FROM Answer
-	GROUP BY QuestionID
+-- Question 2: Tạo view có chứa thông tin các account tham gia vào nhiều group nhất
+CREATE OR REPLACE VIEW vw_Acc_In_Group_Max AS
+WITH CTE_Acc_In_Group_Max AS (
+	SELECT COUNT(GA.AccountID) AS SL FROM groupaccount GA
+	GROUP BY GA.AccountID
 )
-SELECT QuestionID, COUNT(AnswerID) AS 'Số câu trả lời' FROM Answer
-GROUP BY QuestionID
-HAVING COUNT(AnswerID) = (SELECT MAX(SL) FROM CTE_QsMaxAs);
+SELECT a.AccountID, a.FullName, GA.GroupID, COUNT(GA.AccountID) AS 'SL'  FROM groupaccount GA
+INNER JOIN `account` a ON GA.AccountID = a.AccountID
+GROUP BY GA.AccountID
+HAVING COUNT(GA.AccountID) = (SELECT MAX(SL) FROM CTE_Acc_In_Group_Max);
+SELECT * FROM vw_Acc_In_Group_Max;
 
--- Question 9: Thống kê số lượng account trong mỗi group
+-- Question 3: Tạo view có chứa câu hỏi có những content quá dài (content quá 300 từ 
+--  được coi là quá dài) và xóa nó đi
+CREATE OR REPLACE VIEW vw_ContentTooLong AS
+SELECT * FROM Question
+WHERE length(Content) > 30;
 
-SELECT GroupID, COUNT(AccountID) AS AccInGr FROM GroupAccount
-GROUP BY GroupID;
+DELETE FROM vw_ContentTooLong;
 
--- Question 10: Tìm chức vụ có ít người nhất
-WITH CTE_MinPositon AS (
-	SELECT COUNT(p.PositionID) AS SL FROM `Account` A
-	INNER JOIN `Position` P ON A.PositionID = P.PositionID
-	GROUP BY P.PositionID
+-- Question 4: Tạo view có chứa danh sách các phòng ban có nhiều nhân viên nhất
+CREATE OR REPLACE VIEW vw_DEPT_ACC_MAX AS
+WITH CTE_DEPT_ACC_MAX AS (
+	SELECT COUNT(A.DepartmentID) AS SL FROM `Account` A
+	GROUP BY A.DepartmentID 
 )
-SELECT P.PositionName, COUNT(p.PositionID) FROM `Account` A
-INNER JOIN `Position` P ON A.PositionID = P.PositionID
-GROUP BY P.PositionID
-HAVING COUNT(p.PositionID) = (SELECT MIN(SL) FROM CTE_MinPositon);
+SELECT D.DepartmentName, COUNT(A.DepartmentID) AS 'SL'  FROM `Account` A
+INNER JOIN   Department D ON A.DepartmentID = D.DepartmentID
+GROUP BY A.DepartmentID
+HAVING COUNT(D.DepartmentID) = (SELECT MAX(SL) FROM CTE_DEPT_ACC_MAX );
+SELECT * FROM vw_DEPT_ACC_MAX;
 
--- Question 11: Thống kê mỗi phòng ban có bao nhiêu dev, test, scrum master, PM
+ 
+-- Question 5: Tạo view có chứa tất các các câu hỏi do user họ Nguyễn tạo 
 
-SELECT  A.DepartmentID, D.DepartmentName, P.PositionName, COUNT(P.PositionID) AS SL FROM `Account` A
-INNER JOIN `Position` P ON A.PositionID = P.PositionID
-INNER JOIN Department D ON A.DepartmentID = D.DepartmentID
-GROUP BY   A.DepartmentID, P.PositionName;
+CREATE OR REPLACE VIEW vw_Que5
+AS
+SELECT Q.CategoryID, Q.Content, A.FullName AS Creator FROM question Q
+INNER JOIN account A ON A.AccountID = Q.CreatorID 
+WHERE SUBSTRING_INDEX( A.FullName, ' ', 1 ) = 'Nguyễn';
 
--- Question 12: Lấy thông tin chi tiết của câu hỏi bao gồm: thông tin cơ bản của 
---  question, loại câu hỏi, ai là người tạo ra câu hỏi, câu trả lời là gì, …
-
-SELECT Q.CreatorID AS 'Người tạo' ,T.TypeName AS 'Loại câu hỏi', Q.Content AS 'Câu hỏi', AN.Content AS 'Câu trả lời'   FROM Question Q
-INNER JOIN `account` A ON A.AccountID = Q.CreatorID
-INNER JOIN	TypeQuestion T ON q.TypeID = T.TypeID
-INNER JOIN Answer AN ON AN.QuestionID = Q.QuestionID;
-
--- Question 13: Lấy ra số lượng câu hỏi của mỗi loại tự luận hay trắc nghiệm
-
-SELECT TQ.TypeName, COUNT(QuestionID) AS SoLuong FROM Question Q
-INNER JOIN TypeQuestion TQ on TQ.TypeID = Q.TypeID
-GROUP BY TQ.TypeID;
-
--- Question 14:Lấy ra group không có account nào
-
-SELECT * FROM `Group` G
-LEFT JOIN GroupAccount GA ON G.GroupID = GA.GroupID
-WHERE GA.AccountID IS NULL;
-
--- Question 16: Lấy ra question không có answer nào
-
-SELECT * FROM Question Q
-LEFT JOIN Answer A ON Q.QuestionID = A.QuestionID
-WHERE A.QuestionID IS NULL;
-
--- Question 17: 
--- a) Lấy các account thuộc nhóm thứ 1
-
-SELECT * FROM `Account` A
-INNER JOIN GroupAccount GA ON A.AccountID = GA.AccountID
-WHERE GroupID = 1;
-
--- b) Lấy các account thuộc nhóm thứ 2
-
-SELECT * FROM `Account` A
-INNER JOIN GroupAccount GA ON A.AccountID = GA.AccountID
-WHERE GroupID = 2;
-
--- c) Ghép 2 kết quả từ câu a) và câu b) sao cho không có record nào trùng nhau
-
-SELECT * FROM `Account` A
-INNER JOIN GroupAccount GA ON A.AccountID = GA.AccountID
-WHERE GroupID = 1
-UNION
-SELECT * FROM `Account` A
-INNER JOIN GroupAccount GA ON A.AccountID = GA.AccountID
-WHERE GroupID = 2;
-
--- Question 18: 
--- a) Lấy các group có lớn hơn 5 thành viên
-
-SELECT GA.GroupID, COUNT(A.AccountID) AS SL FROM `Account` A
-INNER JOIN GroupAccount GA ON A.AccountID = GA.AccountID
-GROUP BY GroupID
-HAVING SL > 5;
-
--- b) Lấy các group có nhỏ hơn 7 thành viên
-
-SELECT GA.GroupID, COUNT(A.AccountID) AS SL FROM `Account` A
-INNER JOIN GroupAccount GA ON A.AccountID = GA.AccountID
-GROUP BY GroupID
-HAVING SL < 7;
-
--- c) Ghép 2 kết quả từ câu a) và câu b)
-
-SELECT GA.GroupID, COUNT(A.AccountID) AS SL FROM `Account` A
-INNER JOIN GroupAccount GA ON A.AccountID = GA.AccountID
-GROUP BY GA.GroupID
-HAVING SL > 5
-UNION
-SELECT GA.GroupID, COUNT(A.AccountID) AS SL FROM `Account` A
-INNER JOIN GroupAccount GA ON A.AccountID = GA.AccountID
-GROUP BY GA.GroupID
-HAVING SL < 7;
-
+SELECT * FROM vw_Que5;
 
