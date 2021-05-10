@@ -113,7 +113,8 @@ VALUES
         (N'Kĩ thuật'	),
         (N'Nhân sự'		),
         (N'Kế toán'		),
-        (N'Bảo vệ'		);
+        (N'Bảo vệ'		),
+        (N'Phòng chờ'	);
 
 INSERT INTO `Position`(PositionName)
 VALUES 
@@ -311,28 +312,56 @@ SELECT @Type_Name;
 --  chứa chuỗi của người dùng nhập vào hoặc trả về user có username chứa 
 --  chuỗi của người dùng nhập vào
 
+-- Cách 1
 DROP PROCEDURE IF EXISTS sp_GetGr_GetUser;
 DELIMITER $$ 	
 CREATE PROCEDURE sp_GetGr_GetUser (in in_StringInput VARCHAR(20), IN in_select TINYINT)
 			BEGIN
 				IF in_select = 1 THEN 
                 SELECT * FROM  `Group`
-				WHERE GroupName LIKE in_StringInput;
+				WHERE GroupName LIKE CONCAT("%", in_StringInput, "%") ;
                 ELSE
                 SELECT * FROM `account`
-				WHERE UserName LIKE in_StringInput;
+				WHERE UserName LIKE CONCAT("%", in_StringInput, "%");
                 END IF;
 			END$$
 DELIMITER ;
 
-CALL sp_GetGr_GetUser('abcxyz2',2);
+CALL sp_GetGr_GetUser('abc',1);
 
+
+-- Cách 2
+DROP PROCEDURE IF EXISTS GetGroupOrUserName;
+DELIMITER $$
+CREATE PROCEDURE GetGroupOrUserName(IN var_String VARCHAR(50))
+BEGIN
+		SELECT g.GroupName FROM  `Group` g
+		WHERE g.GroupName LIKE CONCAT("%", var_String, "%") 
+		UNION 
+		SELECT a.UserName FROM `account` a
+		WHERE a.UserName LIKE CONCAT("%", var_String, "%");
+END$$
+DELIMITER ;
+Call GetGroupOrUserName('123');
 -- Question 7: Viết 1 store cho phép người dùng nhập vào thông tin fullName, email và 
 --  trong store sẽ tự động gán:
 -- username sẽ giống email nhưng bỏ phần @..mail đi
 -- positionID: sẽ có default là developer
 -- departmentID: sẽ được cho vào 1 phòng chờ
 --  Sau đó in ra kết quả tạo thành công
+DROP PROCEDURE IF EXISTS sp_InsertAccByEmFulN;
+DELIMITER $$
+CREATE PROCEDURE sp_InsertAccByEmFulN(IN var_Email VARCHAR(20), IN var_FullName VARCHAR(30) ) 
+BEGIN
+	DECLARE v_UserName VARCHAR(20) DEFAULT SUBSTRING_INDEX(var_Email, '@', 1);
+	DECLARE v_DepartmentID TINYINT UNSIGNED DEFAULT 11;
+	DECLARE v_PositionID TINYINT UNSIGNED DEFAULT 1;
+	INSERT INTO `Account` 	(FullName, UserName, Email, DepartmentID, PositionID)
+	VALUES 
+							(var_FullName, v_UserName, var_Email, v_DepartmentID, v_PositionID);
+END$$
+DELIMITER ;
+Call sp_InsertAccByEmFulN('ngotruong@gmail.com', 'Ngo Truong');
 
 
 -- Question 8: Viết 1 store cho phép người dùng nhập vào Essay hoặc Multiple-Choice
@@ -372,8 +401,20 @@ CALL sp_DelExFromId(1);
 --  Sau đó in số lượng record đã remove từ các table liên quan trong khi 
 --  removing
 
- 
- 
- 
- 
- 
+--  Question 11: Viết store cho phép người dùng xóa phòng ban bằng cách người dùng 
+--  nhập vào tên phòng ban và các account thuộc phòng ban đó sẽ được 
+--  chuyển về phòng ban default là phòng ban chờ việc
+
+DROP PROCEDURE IF EXISTS sp_DelDeptSetWait;
+DELIMITER $$
+CREATE PROCEDURE sp_DelDeptSetWait(IN var_DepartmentName VARCHAR(30))
+BEGIN
+	DECLARE v_DepartmentID TINYINT UNSIGNED;
+    SELECT d.DepartmentID INTO v_DepartmentID  FROM Department d WHERE d.DepartmentName = var_DepartmentName;
+	UPDATE `account` a SET a.DepartmentID = '11' WHERE a.DepartmentID = v_DepartmentID;
+	DELETE FROM Department WHERE DepartmentName = var_DepartmentName;
+END$$
+DELIMITER ;
+
+CALL sp_DelDeptSetWait('Thư kí');
+
