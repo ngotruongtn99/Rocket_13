@@ -257,7 +257,7 @@ BEFORE INSERT ON `group`
 FOR EACH ROW
 BEGIN
 
-IF (NEW.CreateDate < DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR ) ) THEN
+IF (NEW.CreateDate <= DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR ) ) THEN
 SIGNAL SQLSTATE '12345'
 SET MESSAGE_TEXT = 'Cant Update This Group';
  END IF;
@@ -277,8 +277,11 @@ CREATE TRIGGER Trg_InsertUserToSale
 BEFORE INSERT ON `Account`
 FOR EACH ROW
 BEGIN
-
-IF ( NEW.DepartmentID = 4) THEN
+DECLARE DeptID TINYINT;
+SELECT DepartmentID INTO DeptID
+FROM Department
+WHERE DepartmentName = 'Sale';
+IF ( NEW.DepartmentID = DeptID) THEN
 SIGNAL SQLSTATE '12345'
 SET MESSAGE_TEXT = 'Department "Sale" cannot add more user';
  END IF;
@@ -445,17 +448,17 @@ DELIMITER ;
 -- Question 10: Viết trigger chỉ cho phép người dùng chỉ được update, delete các 
 --  question khi question đó chưa nằm trong exam nào
 
-DROP TRIGGER IF EXISTS Trg_DelQuestion;
+DROP TRIGGER IF EXISTS Trg_UpdateQuestion;
 DELIMITER $$
-CREATE TRIGGER Trg_DelQuestion
+CREATE TRIGGER Trg_UpdateQuestion
 BEFORE UPDATE ON Question 
 FOR EACH ROW
 BEGIN
 DECLARE Qs_Not_In_Exam TINYINT;
-SELECT q.QuestionID INTO Qs_Not_In_Exam
-FROM Question q 
-LEFT JOIN ExamQuestion eq ON q.QuestionID = eq.QuestionID
-WHERE eq.ExamID IS NULL;
+SET Qs_Not_In_Exam = -1;
+SELECT COUNT(1) INTO Qs_Not_In_Exam
+FROM ExamQuestion eq 
+WHERE eq.QuestionID = NEW.QuestionID;
 
 IF ( NEW.QuestionID != Qs_Not_In_Exam) THEN
 
@@ -466,6 +469,69 @@ END$$
 DELIMITER ;
 
 UPDATE Question SET CreatorID = 2 WHERE QuestionID = 1;
+
+DROP TRIGGER IF EXISTS Trg_DelQuestion;
+DELIMITER $$
+CREATE TRIGGER Trg_DelQuestion
+BEFORE DELETE ON Question 
+FOR EACH ROW
+BEGIN
+DECLARE Qs_Not_In_Exam TINYINT;
+SET Qs_Not_In_Exam = -1;
+SELECT COUNT(1) INTO Qs_Not_In_Exam
+FROM ExamQuestion eq 
+WHERE eq.QuestionID = OLD.QuestionID;
+
+IF ( OLD.QuestionID != Qs_Not_In_Exam) THEN
+
+SIGNAL SQLSTATE '12345'
+SET MESSAGE_TEXT = 'Cant Delete This Exam';
+END IF;
+END$$
+DELIMITER ;
+
+DELETE FROM Question WHERE  QuestionID = 5;
+-- Question 12: Lấy ra thông tin exam trong đó:
+-- Duration <= 30 thì sẽ đổi thành giá trị "Short time"
+-- 30 < Duration <= 60 thì sẽ đổi thành giá trị "Medium time"
+-- Duration > 60 thì sẽ đổi thành giá trị "Long time"
+
+SELECT ExamID,
+		CASE 
+			WHEN Duration <= 30 THEN 'Short time'
+            WHEN Duration <= 60 THEN 'Medium time'
+            ELSE 'Longtime'
+		END AS ExamDuration
+FROM Exam;
+
+-- Question 13: Thống kê số account trong mỗi group và in ra thêm 1 column nữa có tên 
+--  là the_number_user_amount và mang giá trị được quy định như sau:2
+-- Nếu số lượng user trong group =< 5 thì sẽ có giá trị là few
+-- Nếu số lượng user trong group <= 20 và > 5 thì sẽ có giá trị là normal
+-- Nếu số lượng user trong group > 20 thì sẽ có giá trị là higher
+
+SELECT GroupID,
+		CASE 
+			WHEN COUNT(AccountID) <= 5 THEN 'few'
+            
+            WHEN COUNT(AccountID) <= 20 THEN 'normal'
+            ELSE 'higher'
+		END AS the_number_user_amount
+FROM GroupAccount
+GROUP BY GroupID;
+
+-- Question 14: Thống kê số mỗi phòng ban có bao nhiêu user, nếu phòng ban nào 
+--  không có user thì sẽ thay đổi giá trị 0 thành "Không có User"
+
+SELECT d.DepartmentID,d.DepartmentName,
+		CASE 
+			WHEN COUNT(AccountID) = 0 THEN 'Không có User'
+            ELSE COUNT(AccountID)
+		END AS SL
+FROM `Account` a
+RIGHT JOIN Department d ON a.DepartmentID = d.DepartmentID
+GROUP BY d.DepartmentID;
+
 
 
 
