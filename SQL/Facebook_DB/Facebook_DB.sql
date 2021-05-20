@@ -5,16 +5,16 @@ USE Facebook_DB;
 DROP TABLE IF EXISTS `National`;
 CREATE TABLE `National` (
 	National_id			TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    National_Name		VARCHAR(30) UNIQUE NOT NULL,
+    National_Name		VARCHAR(30) UNIQUE KEY NOT NULL,
     Language_Main		VARCHAR(20) NOT NULL
 );
 
 DROP TABLE IF EXISTS Office;
 CREATE TABLE Office (
-	Office_id			TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	Office_id			SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     Street_Address		VARCHAR(50) NOT NULL,
     National_id			TINYINT UNSIGNED NOT NULL,
-    CONSTRAINT FK_Office_National FOREIGN KEY (National_id) REFERENCES  `National`(National_id) ON DELETE CASCADE 
+    CONSTRAINT FK_Office_National FOREIGN KEY (National_id) REFERENCES  `National`(National_id)
 );
 
 DROP TABLE IF EXISTS Staff;
@@ -22,16 +22,17 @@ CREATE TABLE Staff (
 	Staff_id			MEDIUMINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     First_Name			VARCHAR(20) NOT NULL,
     Last_Name			VARCHAR(20) NOT NULL,
-    Email				VARCHAR(30) UNIQUE NOT NULL,
-    Office_id			TINYINT UNSIGNED NOT NULL,
-    CONSTRAINT FK_Staff_Office FOREIGN KEY (Office_id) 	REFERENCES  Office(Office_id) ON DELETE CASCADE 
+    Email				VARCHAR(30) UNIQUE KEY NOT NULL,
+    Office_id			SMALLINT UNSIGNED NOT NULL,
+    CONSTRAINT FK_Staff_Office FOREIGN KEY (Office_id) 	REFERENCES  Office(Office_id) 
+ 
 );
 
 -- Ques1: Tạo table với các ràng buộc và kiểu dữ liệu.
 -- Ques2: Thêm 10 bản ghi vào các table
 
 INSERT INTO `National` 	(National_Name, Language_Main)
-VALUES 					('Viet Nam', 'Vietnamese'),
+VALUES 					('Vietnam', 'Vietnamese'),
 						('National_Name 2', 'Language_Main 2'),
                         ('National_Name 3', 'Language_Main 3'),
                         ('National_Name 4', 'Language_Main 1'),
@@ -72,7 +73,7 @@ VALUES
 SELECT s.Staff_id, s.First_Name, s.Last_Name, s.Email, o.Office_id FROM Office o
 INNER JOIN Staff s 		ON o.Office_id = s.Office_id
 INNER JOIN `National` n ON o.National_id = n.National_id
-WHERE n.National_id = 1;
+WHERE n.National_Name = 'Vietnam';
 
 -- Ques4: Lấy ra ID, FullName, Email, National của mỗi nhân viên.
 
@@ -90,9 +91,19 @@ WHERE s.Email = 'daonq@viettel.com.vn';
 -- Ques6: Bạn hãy tìm xem trên hệ thống có quốc gia nào có thông tin trên hệ thống nhưng 
 -- không có nhân viên nào đang làm việc.
 
-SELECT  n.National_id, n.National_Name FROM Office o
+SELECT  n.National_id, n.National_Name, s.Staff_id FROM Staff s
+INNER JOIN office o ON s.Office_id = o.Office_id
 RIGHT JOIN `National` n ON o.National_id = n.National_id
 WHERE o.National_id IS NULL;
+
+WITH cte_tpm_tb_officeID AS (
+SELECT DISTINCT o.National_id FROM office o
+INNER JOIN (SELECT DISTINCT s.Office_id FROM staff s) t ON o.Office_id = t.Office_id
+)
+
+SELECT * FROM cte_tpm_tb_officeID c
+RIGHT JOIN `national` n ON c.National_id = n.National_id
+WHERE c.National_id IS NULL ;
 
 -- Ques7: Thống kê xem trên thế giới có bao nhiêu quốc gia mà FB đang hoạt động sử dụng 
 -- tiếng Anh làm ngôn ngữ chính.
@@ -130,28 +141,232 @@ DROP PROCEDURE IF EXISTS sp_DelNational;
 DELIMITER $$
 CREATE PROCEDURE sp_DelNational(IN var_NationaltName VARCHAR(30))
 BEGIN
-	DECLARE var_NationaltID TINYINT UNSIGNED;
-    DECLARE var_OfficeID TINYINT UNSIGNED;
-    DECLARE var_StaffID TINYINT UNSIGNED;
-    
-    SELECT National_id INTO var_NationaltID FROM `National` WHERE National_Name = var_NationaltName;
-    SELECT Office_id INTO var_OfficeID FROM Office GROUP BY National_id HAVING National_id = var_NationaltID;
-    SELECT Staff_id INTO var_StaffID FROM Staff GROUP BY Office_id HAVING Office_id = var_OfficeID;
-    
-    DELETE FROM Staff WHERE Staff_id = var_StaffID;
-    DELETE FROM Office WHERE Office_id = var_OfficeID;
-	DELETE FROM `National` WHERE National_id = var_NationaltID;
+	 DECLARE nation_id TINYINT;
+	 SELECT n.National_id INTO nation_id FROM `national` n WHERE n.National_Name = natonal_name;
+	 DELETE FROM staff s WHERE s.Office_id IN (SELECT o.Office_id FROM office o WHERE o.National_id = nation_id);
+	 DELETE FROM office o WHERE o.National_id = nation_id;
+	 DELETE FROM `national` n WHERE n.National_id = nation_id;
 END$$
 DELIMITER ;
 
 CALL sp_DelNational('Australia');
 
 
+-- Ques12: Mark muốn biết xem hiện tại đang có bao nhiêu nhân viên trên toàn thế giới đang
+-- làm việc cho anh ấy, hãy viết cho anh ấy 1 Function để a ấy có thể lấy dữ liệu này 1 cách 
+-- nhanh chóng.
+
+SET GLOBAL log_bin_trust_function_creators = 1;
+DROP FUNCTION IF EXISTS fc_NumberOfStaff;
+DELIMITER $$ 
+CREATE FUNCTION fc_NumberOfStaff () RETURNS INT
+BEGIN
+DECLARE sum MEDIUMINT; 
+ SELECT COUNT(1) INTO sum FROM staff;
+RETURN sum;
+END$$
+DELIMITER ;
+SELECT FC_NUMBEROFSTAFF() AS SUM;
+
+-- Ques13: Để thuận tiện cho việc quản trị Mark muốn số lượng nhân viên tại mỗi quốc gia chỉ
+-- tối đa 10.000 người. Bạn hãy tạo trigger cho table Staff chỉ cho phép insert mỗi quốc gia có 
+-- tối đa 10.000 nhân viên giúp anh ấy (có thể cấu hình số lượng nhân viên nhỏ hơn vd 11 nhân
+-- viên để Test).
+
+DROP TRIGGER IF EXISTS trg_limitStaff;
+DELIMITER $$ 
+CREATE TRIGGER trg_limitStaff
+BEFORE INSERT ON Staff
+FOR EACH ROW
+BEGIN
+	DECLARE NationalId TINYINT;
+    DEClARE count_staff SMALLINT;
+    SELECT o.National_id INTO NationalId FROM office o WHERE o.Office_id = NEW.Office_id;
+	SELECT COUNT(1) INTO count_staff FROM Office o
+    INNER JOIN `National` n ON o.National_id = n.National_id
+    INNER JOIN Staff s 		ON o.Office_id = s.Office_id
+    WHERE n.National_id = NationalId;
+ 
+    IF (count_Staff >10000) THEN
+	SIGNAL SQLSTATE '12345'
+	SET MESSAGE_TEXT = 'Cant add more Staff to this Country';
+    END IF; 
+END$$
+DELIMITER ;
+INSERT INTO `staff` (`First_Name`, `Last_Name`, `Email`, `Office_id`) 
+VALUES 				('First_Name20', 'Last_Name20', 'Email20@gmail.com', 1);
+
+-- Ques14: Bạn hãy viết 1 Procedure để lấy ra tên trụ sở mà có số lượng nhân viên đang làm
+-- việc nhiều nhất
+
+DROP PROCEDURE IF EXISTS sp_getMaxStaffInOffice;
+DELIMITER $$
+CREATE PROCEDURE sp_getMaxStaffInOffice()
+BEGIN
+WITH CTE_getMaxStaffInOffice AS (
+	SELECT COUNT(1) AS SL FROM staff s 
+     INNER JOIN office o ON s.Office_id = o.Office_id
+     GROUP BY s.Office_id
+) 
+	 SELECT o.Office_id, o.Street_Address, o.National_id, COUNT(s.Staff_id) FROM staff s 
+     INNER JOIN office o ON s.Office_id = o.Office_id
+     GROUP BY s.Office_id
+     HAVING COUNT(s.Staff_id) = (SELECT MAX(SL) FROM CTE_getMaxStaffInOffice );
+END$$
+DELIMITER ;
+
+CALL sp_getMaxStaffInOffice();
+
+-- Ques15: Bạn hãy viết 1 Function để khi nhập vào thông tin Email của nhân viên thì sẽ trả ra
+-- thông tin đầy đủ của nhân viên đó.(Trả về tên đầy đủ của nhân viên)
+
+SET GLOBAL log_bin_trust_function_creators = 1;
+DROP FUNCTION IF EXISTS fc_getInforStaffByEmail;
+DELIMITER $$
+CREATE FUNCTION fc_getInforStaffByEmail(email VARCHAR(50)) RETURNS VARCHAR(100)
+
+BEGIN
+	DECLARE fullname VARCHAR(40);
+    SELECT CONCAT(First_Name, ' ' , Last_Name) INTO fullname FROM  staff s WHERE s.Email = email;
+    RETURN fullname;
+END$$
+DELIMITER ;
+
+SELECT fc_getInforStaffByEmail('email1@gamil.com') AS FullName;
+
+-- Ques16: Bạn hãy viết 1 Trigger để khi thực hiện cập nhật thông tin về trụ sở làm việc của
+-- nhân viên đó thì hệ thống sẽ tự động lưu lại trụ sở cũ của nhân viên vào 1 bảng khác có tên
+-- Log_Office để Mark có thể xem lại khi cần thiết.
+
+DROP TABLE IF EXISTS Log_Office;
+CREATE TABLE Log_Office(
+	Id 				SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    Email 			VARCHAR(20) NOT NULL,
+    Office_id_Old 	SMALLINT UNSIGNED NOT NULL,
+    ChangeDate		DATETIME
+);
+
+DROP TRIGGER IF EXISTS trg_getOldOfficeId;
+DELIMITER $$
+CREATE TRIGGER trg_getOldOfficeId
+AFTER UPDATE ON staff
+FOR EACH ROW
+BEGIN
+	INSERT INTO `log_office` (`Email`, `Office_id_Old`, `ChangeDate`) 
+	VALUES ( OLD.Email, OLD.Office_id, now());
+    
+END$$
+DELIMITER ;
+
+UPDATE staff SET Office_id = 2 WHERE Staff_id = 1;
+
+-- Ques17: FB đang vướng vào 1 đạo luật hạn chế hoạt động, FB chỉ có thể hoạt động tối đa
+-- trên 100 quốc gia trên thế giới, hãy tạo Trigger để ngăn người nhập liệu nhập vào quốc gia
+-- thứ 101 (bạn có thể sử dụng số nước nhỏ hơn để Test VD 11 nước).
+
+DROP TRIGGER IF EXISTS trg_limitNational;
+DELIMITER $$
+CREATE TRIGGER trg_limitNational
+BEFORE INSERT ON `national` 
+FOR EACH ROW
+BEGIN 
+	DECLARE Count_National TINYINT;
+	SELECT COUNT(1) INTO Count_National FROM `national`;
+    
+    IF(Count_National >= 100) THEN 
+    SIGNAL SQLSTATE '12345'
+    SET MESSAGE_TEXT = "Can not add more National to this Table";
+    END IF;
+    
+END $$
+
+DELIMITER ;
+INSERT INTO `national` (National_Name, Language_Main)
+VALUES 					('National_Name 13', 'Language_Main 24'	);
+
+-- Ques18: Thống kê mỗi xem mỗi nước(National) đang có bao nhiêu nhân viên đang làm việc.
+
+SELECT n.National_id, n.National_Name, COUNT(s.Staff_id) AS SL FROM staff s 
+INNER JOIN office o ON o.Office_id = s.Office_id
+INNER JOIN `national` n ON o.National_id = n.National_id
+GROUP BY n.National_id;
+
+-- Ques19: Viết Procedure để thống kê mỗi xem mỗi nước(National) đang có bao nhiêu nhân
+-- viên đang làm việc, với đầu vào là tên nước.
+
+DROP PROCEDURE IF EXISTS sp_getStaffByNationalName;
+DELIMITER $$
+CREATE PROCEDURE sp_getStaffByNationalName (IN In_NationName VARCHAR(30))
+BEGIN 
+	SELECT n.National_Id, COUNT(s.Staff_id) AS SL FROM staff s 
+    INNER JOIN office o ON s.Office_id = o.Office_id
+    INNER JOIN `national` n ON n.National_id = o.National_id
+    WHERE n.National_Name = In_NationName;
+
+END $$
+DELIMITER ;
+
+CALL sp_getStaffByNationalName('Vietnam');
+
+-- Ques20: Thống kê mỗi xem trong cùng 1 trụ sở (Office) đang có bao nhiêu employee đang
+-- làm việc.
+
+SELECT o.Street_Address, n.National_Name, count(1) AS SL FROM `Staff` s
+INNER JOIN `office` o ON s.Office_id = o.Office_id
+INNER JOIN `national` n ON n.National_id = o.National_id
+GROUP BY o.Office_id;
+
+-- Ques21: Viết Procedure để thống kê mỗi xem trong cùng 1 trụ sở (Office) đang có bao nhiêu
+-- employee đang làm việc đầu vào là ID của trụ sở.
+
+DROP PROCEDURE IF EXISTS sp_getStaffByOfficeId;
+DELIMITER $$
+CREATE PROCEDURE sp_getStaffByOfficeId (IN in_OfficeID TINYINT)
+BEGIN 
+SELECT o.Street_Address, n.National_Name, count(1) AS SL FROM `Staff` s
+INNER JOIN `office` o ON s.Office_id = o.Office_id
+INNER JOIN `national` n ON n.National_id = o.National_id
+GROUP BY o.Office_id
+HAVING o.Office_id = in_OfficeID;
+END $$
+DELIMITER ; 
+
+CALL sp_getStaffByOfficeId(1);
+
+-- Ques22: Viết Procedure để lấy ra tên quốc gia đang có nhiều nhân viên nhất.
+
+DROP PROCEDURE IF EXISTS sp_getNationalMaxStaff;
+DELIMITER $$
+CREATE PROCEDURE sp_getNationalMaxStaff()
+BEGIN 
+WITH CTE_GetNationalMaxStaff AS (
+	SELECT  count(1) AS SL FROM `Staff` s
+	INNER JOIN `office` o ON s.Office_id = o.Office_id
+	INNER JOIN `national` n ON n.National_id = o.National_id
+    GROUP BY o.National_id
+)
+SELECT n.National_id, n.National_Name,  COUNT(1) AS SL FROM Staff s
+INNER JOIN `office` o ON s.Office_id = o.Office_id
+INNER JOIN `national` n ON n.National_id = o.National_id
+GROUP BY o.National_id
+HAVING COUNT(s.Staff_id) = (SELECT MAX(SL) FROM CTE_GetNationalMaxStaff);
+END $$
+
+DELIMITER ;
+
+CALL sp_getNationalMaxStaff();
+
+-- Ques23: (Trùng Ques18) Thống kê mỗi country có bao nhiêu employee đang làm việc
+
+-- Ques24: Bạn hãy cấu hình lại các bảng và ràng buộc giữ liệu sao cho khi xóa 1 trụ sở làm
+-- việc (Office) thì tất cả dữ liệu liên quan đến trụ sở này sẽ chuyển về Null
+
+ALTER TABLE Staff DROP FOREIGN KEY FK_Staff_Office;
+ALTER TABLE Staff ADD CONSTRAINT FK_Staff_Office FOREIGN KEY (Office_id) REFERENCES  Office (Office_id);
+
+-- Ques25: Bạn hãy cấu hình lại các bảng và ràng buộc giữ liệu sao cho khi xóa 1 trụ sở làm
+-- việc (Office) thì tất cả dữ liệu liên quan đến trụ sở này sẽ bị xóa hết.
 
 
-
-
-
-
-
-
+ALTER TABLE Staff DROP FOREIGN KEY FK_Staff_Office;
+ALTER TABLE Staff ADD CONSTRAINT FK_Staff_Office FOREIGN KEY (Office_id) REFERENCES Office(Office_id) ON DELETE CASCADE;

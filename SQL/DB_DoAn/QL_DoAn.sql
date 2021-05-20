@@ -30,11 +30,11 @@ CREATE TABLE HuongDan (
 	Id 				SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 	Id_SV			SMALLINT UNSIGNED NOT NULL,
     Id_DeTai		SMALLINT UNSIGNED NOT NULL,
-    Id_GV			SMALLINT UNSIGNED NOT NULL,
+    Id_GV			TINYINT UNSIGNED NOT NULL,
 	Diem			TINYINT UNSIGNED NOT NULL,
-    CONSTRAINT FK_Huongdan_SinhVien FOREIGN KEY (Id_SV) REFERENCES SinhVien(Id_SV) ON DELETE CASCADE,
-    CONSTRAINT FK_Huongdan_DeTai FOREIGN KEY (Id_DeTai) REFERENCES DeTai(Id_DeTai) ON DELETE CASCADE,
-    CONSTRAINT FK_Huongdan_GiangVien FOREIGN KEY (Id_GV) REFERENCES GiangVien(Id_GV) ON DELETE CASCADE
+    CONSTRAINT FK_Huongdan_SinhVien FOREIGN KEY (Id_SV) REFERENCES SinhVien(Id_SV),
+    CONSTRAINT FK_Huongdan_DeTai FOREIGN KEY (Id_DeTai) REFERENCES DeTai(Id_DeTai),
+    CONSTRAINT FK_Huongdan_GiangVien FOREIGN KEY (Id_GV) REFERENCES GiangVien(Id_GV)
 );
 -- 1. Tạo table với các ràng buộc và kiểu dữ liệu
 
@@ -139,22 +139,10 @@ VALUES 					('SinhVien11',1949,'Thai Nguyen');
 -- 5. Hãy cấu hình table sao cho khi xóa 1 sinh viên nào đó thì sẽ tất cả thông
 -- tin trong table HuongDan liên quan tới sinh viên đó sẽ bị xóa đi
 
+ALTER TABLE HuongDan DROP FOREIGN KEY FK_Huongdan_SinhVien;
+ALTER TABLE HuongDan ADD CONSTRAINT FK_Huongdan_SinhVien FOREIGN KEY (Id_SV) REFERENCES SinhVien(Id_SV) ON DELETE CASCADE;
 
-DROP TRIGGER IF EXISTS Trg_DelSV;
-DELIMITER $$
-CREATE TRIGGER Trg_DelSV
-BEFORE DELETE ON SinhVien
-FOR EACH ROW
-BEGIN
-	DECLARE IdHD SMALLINT;
-    SELECT hd.Id INTO IdHD FROM HuongDan hd
-    WHERE hd.Id_SV = OLD.Id_SV
-    LIMIT 1;
-	DELETE FROM HuongDan WHERE Id = IdHD;
-END$$
-DELIMITER ;
- 
-DELETE FROM SinhVien WHERE Id_SV = 1;
+
 
 -- 6. Viết 1 Procedure để khi nhập vào tên của sinh viên thì sẽ thực hiện xóa toàn bộ thông tin 
 -- liên quan của sinh viên trên hệ thống
@@ -165,15 +153,12 @@ DELIMITER $$
 CREATE PROCEDURE sp_DelSvByName(IN in_SvName VARCHAR(40))
 BEGIN		
 		DECLARE IdSv SMALLINT UNSIGNED;
-		DECLARE IdDt SMALLINT UNSIGNED;
 		SELECT Id_SV INTO  IdSv FROM SinhVien WHERE Ten_SV = in_SvName;
-		SELECT Id_DeTai INTO IdDt FROM HuongDan WHERE Id_SV = IdSv;
-		DELETE FROM HuongDan WHERE  Id = IdDt;
+		DELETE FROM HuongDan WHERE  Id_SV = IdSv;
 		DELETE FROM SinhVien WHERE  Ten_SV = in_SvName;
 END$$
 DELIMITER ;
 
 CALL sp_DelSvByName('Sinh Vien 3');
-
 
                      
