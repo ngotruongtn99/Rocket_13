@@ -1,26 +1,27 @@
 package com.vti.backend;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Scanner;
 
-import com.vti.entity.Book;
-import com.vti.entity.Employees;
-import com.vti.entity.Engineer;
-import com.vti.entity.Library;
-import com.vti.entity.Magazines;
-import com.vti.entity.Newspapers;
-import com.vti.entity.Staff;
-import com.vti.entity.Worker;
+import com.vti.entity.Ex5.Q1_2.Employees;
+import com.vti.entity.Ex5.Q1_2.Engineer;
+import com.vti.entity.Ex5.Q1_2.Staff;
+import com.vti.entity.Ex5.Q1_2.Worker;
+import com.vti.entity.Ex5.Q3.HighSchoolStudent;
+import com.vti.entity.Ex5.Q4.Book;
+import com.vti.entity.Ex5.Q4.Library;
+import com.vti.entity.Ex5.Q4.Magazines;
+import com.vti.entity.Ex5.Q4.Newspapers;
 
 public class Exercise5 {
-	ArrayList<Staff> staffs = new ArrayList<Staff>(); 
+	public static int codeID = 0;
+	ArrayList<Staff> staffs = new ArrayList<Staff>();
 	ArrayList<Library> documents = new ArrayList<Library>();
-	ArrayList<Book> books = new ArrayList<Book>();
-	ArrayList<Magazines> magazines = new ArrayList<Magazines>();
-	ArrayList<Newspapers> newspapers = new ArrayList<Newspapers>();
+
 	public void Question1_2() {
 
-		
 		Worker staff1 = new Worker("Tú", 23, "Address 1", 7);
 		staff1.setGioiTinh(0);
 		Engineer staff2 = new Engineer("Linh", 20, "Address 2", "CNTT");
@@ -39,34 +40,34 @@ public class Exercise5 {
 		staffs.add(staff4);
 		staffs.add(staff5);
 		staffs.add(staff6);
-		 Scanner sc = new Scanner(System.in);
-		 while (true) {
-			 System.out.println("*----------------------------MENU----------------------------*");
-			 System.out.println("|==     1) Thêm mới cán bộ                                 ==|");
-			 System.out.println("|==     2) Tìm kiếm theo họ tên                            ==|");
-			 System.out.println("|==     3) Hiển thị thông tin về danh sách các cán bộ      ==|");
-			 System.out.println("|==     4) Nhập vào tên của cán bộ và delete cán bộ đón    ==|");
-			 System.out.println("|==     5) Thoát khỏi chương trình                         ==|");
-			 System.out.println("*------------------------------------------------------------*");
-			 int choose = sc.nextInt();
-			 if(choose == 1 || choose == 2 || choose == 3 || choose == 4 || choose == 5) {
-				 switch (choose) {
+		Scanner sc = new Scanner(System.in);
+		while (true) {
+			System.out.println("*----------------------------MENU----------------------------*");
+			System.out.println("|==     1) Thêm mới cán bộ                                 ==|");
+			System.out.println("|==     2) Tìm kiếm theo họ tên                            ==|");
+			System.out.println("|==     3) Hiển thị thông tin về danh sách các cán bộ      ==|");
+			System.out.println("|==     4) Nhập vào tên của cán bộ và delete cán bộ đón    ==|");
+			System.out.println("|==     5) Thoát khỏi chương trình                         ==|");
+			System.out.println("*------------------------------------------------------------*");
+			int choose = sc.nextInt();
+			if (choose == 1 || choose == 2 || choose == 3 || choose == 4 || choose == 5) {
+				switch (choose) {
 				case 1:
 					addNewStaff();
 					break;
-					
+
 				case 2:
 					findStaffByName();
 					break;
-					
+
 				case 3:
 					displayInformation();
 					break;
-	
+
 				case 4:
 					removeStaff();
 					break;
-	
+
 				case 5:
 					System.out.println("Bạn muốn thoát khỏi chương không ?");
 					System.out.println("Chọn 0 để thoát. Nếu muốn tiếp tục, hãy chọn MENU");
@@ -77,26 +78,25 @@ public class Exercise5 {
 						return;
 					}
 				}
-			 }else {
-					System.out.println("Nhập lại: ");
-				}
+			} else {
+				System.out.println("Nhập lại: ");
+			}
 		}
-		 
-		 
+
 	}
-	
+
 	public void Question4() {
 		Scanner sc = new Scanner(System.in);
 		while (true) {
-			 System.out.println("*-------------------------------QUẢN LÝ TÀI LIỆU----------------------------*");
-			 System.out.println("|==     1) Thêm mới tài liêu: Sách, tạp chí, báo.                         ==|");
-			 System.out.println("|==     2) Xoá tài liệu theo mã tài liệu                                  ==|");
-			 System.out.println("|==     3) Hiện thị thông tin về tài liệu.                                ==|");
-			 System.out.println("|==     4) Tìm kiếm tài liệu theo loại: Sách, tạp chí, báo.               ==|");
-			 System.out.println("|==     5) Thoát khỏi chương trình                                        ==|");
-			 System.out.println("*---------------------------------------------------------------------------*");
-			 int choose = sc.nextInt();
-			 if(choose == 1 || choose == 2 || choose == 3 || choose == 4 || choose == 5) {
+			System.out.println("*-------------------------------QUẢN LÝ TÀI LIỆU----------------------------*");
+			System.out.println("|==     1) Thêm mới tài liêu: Sách, tạp chí, báo.                         ==|");
+			System.out.println("|==     2) Xoá tài liệu theo mã tài liệu                                  ==|");
+			System.out.println("|==     3) Hiện thị thông tin về tài liệu.                                ==|");
+			System.out.println("|==     4) Tìm kiếm tài liệu theo loại: Sách, tạp chí, báo.               ==|");
+			System.out.println("|==     5) Thoát khỏi chương trình                                        ==|");
+			System.out.println("*---------------------------------------------------------------------------*");
+			int choose = sc.nextInt();
+			if (choose == 1 || choose == 2 || choose == 3 || choose == 4 || choose == 5) {
 				switch (choose) {
 				case 1:
 					addNewDocument();
@@ -105,15 +105,15 @@ public class Exercise5 {
 				case 2:
 					deleteDocumentByCodeId();
 					break;
-					
+
 				case 3:
 					displayInformationDocuments();
 					break;
-				
+
 				case 4:
 					searchDocumentByType();
 					break;
-					
+
 				case 5:
 					System.out.println("Bạn muốn thoát khỏi chương không ?");
 					System.out.println("Chọn 0 để thoát. Nếu muốn tiếp tục, hãy chọn MENU");
@@ -123,53 +123,74 @@ public class Exercise5 {
 						System.out.println("Byeee !!");
 						return;
 					}
-			}
-			}else {
+				}
+			} else {
 				System.out.println("Nhập lại: ");
-				
+
 			}
 		}
 	}
-	
-	
+
+	public void question3() {
+		HighSchoolStudent highSchoolStudent = new HighSchoolStudent(1, "Nam", "Chuyên Văn", "Đại học công nghệ");
+		System.out.println(highSchoolStudent);
+	}
+
 	private void deleteDocumentByCodeId() {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Nhập MÃ TÀI LIỆU muốn xóa");
-		String codeInput = sc.next();
-		for (int i = 0; i < documents.size(); i++) {
-			if (documents.get(i).getCodeId().equals(codeInput) ) {
-				documents.remove(i);
-				System.out.println("Xóa thành công");
-				displayInformationDocuments();
-			} else {
-				System.out.println("Nhập sai MÃ TÀI LIỆU");
+		int codeInput = sc.nextInt();
+		Boolean flagCheckExists = false;
+		for (Library library : documents) {
+			if (library.getCodeId() == codeInput) {
+				flagCheckExists = true;
 			}
 		}
-		
-	}	
-		
+		if (flagCheckExists) {
+			documents.removeIf(doc -> doc.getCodeId() == codeInput);
+			for (Library library : documents) {
+				System.out.println("Xóa thành công tài liệu");
+				displayInformationDocuments();
+			}
+		} else {
+			System.out.println("Mã tài liệu bạn nhập không có trên hệ thống.");
+		}
+	}
+
 	private void searchDocumentByType() {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Nhập loại tài liệu muốn tìm kiếm: \n1.Sách \n2.Tạp chí \n3.Báo)");
 		int numberInput = sc.nextInt();
 		switch (numberInput) {
 		case 1:
-			System.out.println(books.toString());
+			for (Library library : documents) {
+				if (library instanceof Book) {
+					System.out.println(library.toString());
+				}
+			}
 			break;
 
 		case 2:
-			System.out.println(magazines.toString());
+			for (Library library : documents) {
+				if (library instanceof Magazines) {
+					System.out.println(library.toString());
+				}
+			}
 			break;
-			
+
 		case 3:
-			System.out.println(newspapers.toString());
+			for (Library library : documents) {
+				if (library instanceof Newspapers) {
+					System.out.println(library.toString());
+				}
+			}
 			break;
-			
-			default:
-				System.out.println("Nhập sai, mời nhập lại");
-				break;
+
+		default:
+			System.out.println("Nhập sai, mời nhập lại");
+			break;
 		}
-		
+
 	}
 
 	private void displayInformationDocuments() {
@@ -185,82 +206,95 @@ public class Exercise5 {
 		System.out.format(midAlignFormat, "NHÀ SẢN XUẤT");
 		System.out.format(right1AlignFormat, "LOẠI TÀI LIỆU");
 		System.out.format("+--------------------------------------------------------------------------+%n");
-	for (int j = 0; j < documents.size(); j++) {
-		System.out.format(leftAlignFormat, documents.get(j).getCodeId());
-		System.out.format(left1AlignFormat, documents.get(j).getnumberOfReleaseEdition());
-		System.out.format(midAlignFormat, documents.get(j).getPublishingCompany());
-		System.out.format(right1AlignFormat, "UNKNOWN");
-		
-	}
+		for (Library library : documents) {
+			System.out.format(leftAlignFormat, library.getCodeId());
+			System.out.format(left1AlignFormat, library.getNumberOfReleaseEdition());
+			System.out.format(midAlignFormat, library.getPublishingCompany());
+			if (library instanceof Book) {
+				System.out.format(right1AlignFormat, "Book");
+			} else if (library instanceof Magazines) {
+				System.out.format(right1AlignFormat, "Magazine");
+			} else {
+				System.out.format(right1AlignFormat, "Newspaper");
+			}
+		}
+
 		System.out.format("+--------------------------------------------------------------------------+%n");
 	}
 
 	private void addNewDocument() {
 		Scanner sc = new Scanner(System.in);
-		 System.out.println("*-------------------------------CHỌN LOẠI TÀI LIỆU--------------------------*");
-		 System.out.println("|==     1) Thêm mới SÁCH                                                  ==|");
-		 System.out.println("|==     2) Thêm mới TẠP CHÍ                                               ==|");
-		 System.out.println("|==     3) Thêm mới BÁO                                                   ==|");
-		 System.out.println("*---------------------------------------------------------------------------*");
-		 int choose = sc.nextInt();
-		 if (choose ==  1 || choose == 2 || choose == 3) {
-			 switch (choose) {
-				case 1:
-					addNewBook();
-					break;
+		System.out.println("*-------------------------------CHỌN LOẠI TÀI LIỆU--------------------------*");
+		System.out.println("|==     1) Thêm mới SÁCH                                                  ==|");
+		System.out.println("|==     2) Thêm mới TẠP CHÍ                                               ==|");
+		System.out.println("|==     3) Thêm mới BÁO                                                   ==|");
+		System.out.println("*---------------------------------------------------------------------------*");
+		int choose = sc.nextInt();
+		if (choose == 1 || choose == 2 || choose == 3) {
+			switch (choose) {
+			case 1:
+				addNewBook();
+				break;
 
-				case 2:
-					addNewMagazine();
-					break;
-					
-				case 3:
-					addNewNewspaper();
-					break;
-				}
+			case 2:
+				addNewMagazine();
+				break;
+
+			case 3:
+				addNewNewspaper();
+				break;
+			}
 		} else {
 			System.out.println("Chọn sai, mời chọn lại");
 		}
-		 
+
 	}
 
 	private void addNewNewspaper() {
 		Scanner sc = new Scanner(System.in);
-		System.out.println("Nhập MÃ TÀI LIỆU");
-		String codeInput = sc.next();
 		System.out.println("Nhập TÊN NHÀ XUẤT BẢN ");
 		String nameCompanyInput = sc.next();
 		System.out.println("Nhập SỐ BẢN PHÁT HÀNH");
 		int numberReleaseEditionInput = sc.nextInt();
-		System.out.println("Nhập NGÀY PHÁT HÀNH(1 -> 31)");
-		int dateReleaseInput = sc.nextInt();
-		Newspapers newNewspaper = new Newspapers(codeInput, nameCompanyInput, numberReleaseEditionInput, dateReleaseInput);
+		System.out.println("Nhập vào ngày phát hành: ");
+		int day1 = sc.nextInt();
+		System.out.println("Nhập vào tháng phát hành: ");
+		int month1 = sc.nextInt();
+		System.out.println("Nhập vào năm phát hành: ");
+		int year1 = sc.nextInt();
+		LocalDate dayReleaseInput = LocalDate.of(year1, month1, day1);
+		codeID++;
+		Library newNewspaper = new Newspapers(codeID, nameCompanyInput, numberReleaseEditionInput, dayReleaseInput);
 		documents.add(newNewspaper);
-		newspapers.add(newNewspaper);
+//		System.out.println(documents.toString());
 		displayInformationDocuments();
 	}
 
 	private void addNewMagazine() {
 		Scanner sc = new Scanner(System.in);
-		System.out.println("Nhập MÃ TÀI LIỆU");
-		String codeInput = sc.next();
 		System.out.println("Nhập TÊN NHÀ XUẤT BẢN ");
 		String nameCompanyInput = sc.next();
 		System.out.println("Nhập SỐ BẢN PHÁT HÀNH");
 		int numberReleaseEditionInput = sc.nextInt();
 		System.out.println("Nhập SỐ PHÁT HÀNH");
 		int numberReleaseInput = sc.nextInt();
-		System.out.println("Nhập THÁNG PHÁT HÀNH (1 -> 12)");
-		int monthReleaseInput = sc.nextInt();
-		Magazines newMagazine = new Magazines(codeInput, nameCompanyInput, numberReleaseEditionInput, numberReleaseInput, monthReleaseInput);
+		System.out.println("Nhập vào ngày phát hành: ");
+		int day1 = sc.nextInt();
+		System.out.println("Nhập vào tháng phát hành: ");
+		int month1 = sc.nextInt();
+		System.out.println("Nhập vào năm phát hành: ");
+		int year1 = sc.nextInt();
+		LocalDate monthReleaseInput = LocalDate.of(year1, month1, day1);
+		codeID++;
+		Library newMagazine = new Magazines(codeID, nameCompanyInput, numberReleaseEditionInput, numberReleaseInput,
+				monthReleaseInput);
 		documents.add(newMagazine);
-		magazines.add(newMagazine);
+//		System.out.println(documents.toString());
 		displayInformationDocuments();
 	}
 
 	private void addNewBook() {
 		Scanner sc = new Scanner(System.in);
-		System.out.println("Nhập MÃ TÀI LIỆU");
-		String codeInput = sc.next();
 		System.out.println("Nhập TÊN NHÀ XUẤT BẢN ");
 		String nameCompanyInput = sc.next();
 		System.out.println("Nhập SỐ BẢN PHÁT HÀNH");
@@ -269,102 +303,112 @@ public class Exercise5 {
 		String nameWriterInput = sc.next();
 		System.out.println("Nhập SỐ TRANG");
 		int numberOfPageInput = sc.nextInt();
-		Book newBook = new Book(codeInput, nameCompanyInput, numberReleaseEditionInput, nameWriterInput, numberOfPageInput);
+		codeID++;
+		Library newBook = new Book(codeID, nameCompanyInput, numberReleaseEditionInput, nameWriterInput,
+				numberOfPageInput);
 		documents.add(newBook);
-		books.add(newBook);
+//		System.out.println(documents.toString());
 		displayInformationDocuments();
 	}
 
 	private void removeStaff() {
 		Scanner sc = new Scanner(System.in);
-		System.out.println("Nhập tên nhân viên muốn xóa");
-		String nameStaff = sc.next();
-		int indexInput = -1;
-		for (int i = 0; i < staffs.size(); i++) {
-			if (staffs.get(i).getName().equals(nameStaff)) {
-				indexInput = i;
+		System.out.println("Nhập tên cần xóa thông tin: ");
+		String delName = sc.next();
+		Iterator<Staff> iterator = staffs.iterator();
+		while (iterator.hasNext()) {
+			Staff staff = (Staff) iterator.next();
+			if (staff.getName().equals(delName)) {
+				iterator.remove();
 			}
-		}
-		if (indexInput < 0) {
-			System.out.println("Không tìm thấy nhân viên muốn xóa, vui lòng thử lại");
-		} else {
-			staffs.remove(indexInput);
-			displayInformation();
+
 		}
 	}
-	
+
 	private void displayInformation() {
 		String leftAlignFormat = "| %-17s ";
 		String left1AlignFormat = "| %-16s ";
 		String midAlignFormat = "| %-16s";
-		String right1AlignFormat = "| %-15s |%n";
-		System.out.format("+--------------------------------------------------------------------------+%n");
-		System.out.format("|                               THÔNG TIN STAFF                            |%n");
-		System.out.format("+--------------------------------------------------------------------------+%n");
+		String right1AlignFormat = "| %-15s ";
+		String rightAlignFormat = "| %-12s |%n";
+		System.out.format(
+				"+-----------------------------------------------------------------------------------------+%n");
+		System.out.format(
+				"|                                   THÔNG TIN STAFF                                       |%n");
+		System.out.format(
+				"+-----------------------------------------------------------------------------------------+%n");
 		System.out.format(leftAlignFormat, "Name");
 		System.out.format(left1AlignFormat, "Age");
 		System.out.format(midAlignFormat, "Gender");
 		System.out.format(right1AlignFormat, "Address");
-		
-		System.out.format("+--------------------------------------------------------------------------+%n");
-	for (int j = 0; j < staffs.size(); j++) {
-		System.out.format(leftAlignFormat, staffs.get(j).getName());
-		System.out.format(left1AlignFormat, staffs.get(j).getAge());
-		System.out.format(midAlignFormat, staffs.get(j).getGioiTinh());
-		System.out.format(right1AlignFormat, staffs.get(j).getAddress());
+		System.out.format(rightAlignFormat, "Position");
+		System.out.format(
+				"+-----------------------------------------------------------------------------------------+%n");
+		for (Staff staff : staffs) {
+			System.out.format(leftAlignFormat, staff.getName());
+			System.out.format(left1AlignFormat, staff.getAge());
+			System.out.format(midAlignFormat, staff.getGioiTinh());
+			System.out.format(right1AlignFormat, staff.getAddress());
+			if (staff instanceof Worker) {
+				System.out.format(rightAlignFormat, "Worker");
+			} else if (staff instanceof Engineer) {
+				System.out.format(rightAlignFormat, "Engineer");
+			} else {
+				System.out.format(rightAlignFormat, "Employee");
+			}
+
+		}
+		System.out.format(
+				"+-----------------------------------------------------------------------------------------+%n");
 	}
-		System.out.format("+--------------------------------------------------------------------------+%n");
-	}
+
 	private void findStaffByName() {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Nhập tên nhân viên muốn tìm");
 		String nameStaff = sc.next();
 		int indexInput = -1;
 		for (int i = 0; i < staffs.size(); i++) {
-			if(staffs.get(i).getName().equals(nameStaff)) {
+			if (staffs.get(i).getName().equals(nameStaff)) {
 				indexInput = i;
 			}
-			
+
 		}
 		if (indexInput < 0) {
 			System.out.println("Không có nhân viên có tên như trên, mời thử lại sau");
-		}else {
+		} else {
 			System.out.println("Thông tin nhân viên bạn cần tìm là: ");
-			System.out.println("*----------------------Danh sách nhân viên--------------------*");
-			 System.out.println("|==     1) Worker                                          ==|");
-			 System.out.println("|==     2) Engineer                                        ==|");
-			 System.out.println("|==     3) Employees                                       ==|");
-			 System.out.println("*------------------------------------------------------------*");
 			System.out.println(staffs.get(indexInput).toString());
-		
+
 		}
-		
+
 	}
+
 	private void addNewStaff() {
 		Scanner sc = new Scanner(System.in);
-		 System.out.println("*------------------Chọn loại cán bộ muốn thêm----------------*");
-		 System.out.println("|==     1) Worker                                          ==|");
-		 System.out.println("|==     2) Engineer                                        ==|");
-		 System.out.println("|==     3) Employees                                       ==|");
-		 System.out.println("*------------------------------------------------------------*");
+		System.out.println("*------------------Chọn loại cán bộ muốn thêm----------------*");
+		System.out.println("|==     1) Worker                                          ==|");
+		System.out.println("|==     2) Engineer                                        ==|");
+		System.out.println("|==     3) Employees                                       ==|");
+		System.out.println("*------------------------------------------------------------*");
 		int choose = sc.nextInt();
-		if(choose == 1 || choose == 2 || choose == 3) {
+		if (choose == 1 || choose == 2 || choose == 3) {
 			switch (choose) {
 			case 1:
 				addNewWorker();
 				break;
-				
+
 			case 2:
 				addNewEngineer();
 				break;
-				
-			case 3: 
+
+			case 3:
 				addNewEmployees();
 				break;
 
 			}
 		}
 	}
+
 	private void addNewEmployees() {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Nhập tên Employee: ");
@@ -384,6 +428,7 @@ public class Exercise5 {
 		staffs.add(Employees1);
 		displayInformation();
 	}
+
 	private void addNewEngineer() {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Nhập tên Engineer: ");
@@ -403,6 +448,7 @@ public class Exercise5 {
 		staffs.add(Engineer1);
 		displayInformation();
 	}
+
 	private void addNewWorker() {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Nhập tên Worker: ");
@@ -421,6 +467,6 @@ public class Exercise5 {
 		System.out.println(worker1.toString());
 		staffs.add(worker1);
 		displayInformation();
-		
+
 	}
 }

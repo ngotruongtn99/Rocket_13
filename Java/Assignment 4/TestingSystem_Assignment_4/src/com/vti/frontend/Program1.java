@@ -1,67 +1,40 @@
 package com.vti.frontend;
 
 import java.util.ArrayList;
-import java.util.Scanner;
-
 import com.vti.backend.Exercise4;
-import com.vti.entity.Student;
+import com.vti.entity.Ex4.Student;
 
 public class Program1 {
 	public static void main(String[] args) {
-	
-//		Student student1 = new Student(1, "Trường", "TN", 0);
-//		Student student2 = new Student(2, "Linh", "NĐ", 0);
-//		Student student3 = new Student(3, "Tú", "TN", 0);
-//		Student student4 = new Student(4, "Hà", "TN", 0);
-//		Student student5 = new Student(5, "Nhật", "HY", 0);
-//		Student student6 = new Student(6, "Hoa", "HN", 0);	
-//		
-//		ArrayList<Student> arrStudent = new ArrayList<Student>();
-//		arrStudent.add(student1);
-//		arrStudent.add(student2);
-//		arrStudent.add(student3);
-//		arrStudent.add(student4);
-//		arrStudent.add(student5);
-//		arrStudent.add(student6);
-//		System.out.println(arrStudent.get(1).getId());
-//		System.out.println(arrStudent);
+		ArrayList<Student> arrStudent = new ArrayList<Student>();
+		Student student1 = new Student(1, "Trường", "TN");
+		Student student2 = new Student(2, "Linh", "NĐ");
+		Student student3 = new Student(3, "Tú", "TN");
+		Student student4 = new Student(4, "Hà", "TN");
+		Student student5 = new Student(5, "Nhật", "HY");
+		Student student6 = new Student(6, "Hoa", "HN");	
 		
-		Scanner sc = new Scanner(System.in);
+		student1.setMark(5f);
+		student2.setMark(3f);
+		student3.setMark((float) 7.5);
+		student4.setMark((float) 8.5);
+		student5.setMark((float) 9.2);
+		student6.setMark((float) 4.5);
 		
-//		while (true) {
-//			System.out.println("|---------------------Mời bạn chọn chức năng---------------------|");
-//			System.out.println("|===                  1. Thêm điểm cho sinh viên              ===|");
-//			System.out.println("|===                  2. Cộng thêm điểm vào                   ===|");
-//			System.out.println("|===                  3. In thông tin sinh viên               ===|");
-//			System.out.println("|===                  4. Thoát                                ===|");
-//			System.out.println("|----------------------------------------------------------------|");
-//			int choose = sc.nextInt();
-//			if (choose == 1 || choose == 2 || choose == 3 || choose == 4) {
-//				switch (choose) {
-//				case 1:
-//					Exercise4 exercise4 = new Exercise4();
-//					exercise4.setMark();
-//					break;
-//					
-//				case 2:
-//					
-//					break;
-//					
-//				case 3:
-//					
-//					break;
-//
-//				case 4:
-//					return;
-//				}
-//				
-//			} else {
-//				System.out.println("Nhập sai, mời thử lại");
-//			}
-//			
+		
+		arrStudent.add(student1);
+		arrStudent.add(student2);
+		arrStudent.add(student3);
+		arrStudent.add(student4);
+		arrStudent.add(student5);
+		arrStudent.add(student6);
+//		for (Student student : arrStudent) {
+//			System.out.println(student.toString());
 //		}
+		 Exercise4 exercise4 = new Exercise4();
+		 exercise4.printStudent();
+		
 		
 	}
-
 
 }
