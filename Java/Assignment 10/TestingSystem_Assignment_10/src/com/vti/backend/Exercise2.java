@@ -5,14 +5,15 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.vti.backend.datalayer.DepartmentRepository;
 import com.vti.entity.Department;
 import com.vti.ultis.ScannerUltis;
 
 public class Exercise2 {
-	private DepartmentDao depDao;
+	private DepartmentRepository depDao;
 	
 	public Exercise2() throws FileNotFoundException, IOException {
-		depDao = new DepartmentDao();
+		depDao = new DepartmentRepository();
 	}
 	
 	public void Question1() throws ClassNotFoundException, SQLException {

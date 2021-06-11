@@ -1,4 +1,4 @@
-package com.vti.backend;
+package com.vti.backend.datalayer;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,13 +11,14 @@ import com.vti.entity.Department;
 import com.vti.ultis.ScannerUltis;
 import com.vti.ultis.jdbcUltis;
 
-public class DepartmentDao {
+public class DepartmentRepository implements IDepartmentRepository {
 	private jdbcUltis jdbc;
 
-	public DepartmentDao() throws FileNotFoundException, IOException {
+	public DepartmentRepository() throws FileNotFoundException, IOException {
 		jdbc = new jdbcUltis();
 	}
 	
+	@Override
 	public List<Department> getDepartments() throws ClassNotFoundException, SQLException {
 		String sql = "SELECT * FROM Department ORDER BY DepartmentID;";
 		ResultSet depResult = jdbc.executeQuery(sql);
@@ -30,6 +31,7 @@ public class DepartmentDao {
 		return listDep;
 	}
 	
+	@Override
 	public Department getDepartmentById() throws ClassNotFoundException, SQLException {
 		String sql = "SELECT * FROM Department WHERE DepartmentID = ?;";
 		System.out.println("Nhập vào ID: ");
@@ -47,6 +49,7 @@ public class DepartmentDao {
 		}		
 	}
 	
+	@Override
 	public Department getDepartmentById(int id) throws ClassNotFoundException, SQLException {
 		String sql = "SELECT * FROM Department WHERE DepartmentID = ?;";
 		PreparedStatement depStatement = jdbc.createPrepareStatement(sql);
@@ -62,6 +65,7 @@ public class DepartmentDao {
 		}		
 	}
 	
+	@Override
 	public Boolean isDepartmentNameExists(String name) throws SQLException, ClassNotFoundException {
 		String sql = "SELECT * FROM Department WHERE DepartmentName = ?";
 		PreparedStatement preStatement = jdbc.createPrepareStatement(sql);
@@ -77,6 +81,7 @@ public class DepartmentDao {
 		}
 	}
 	
+	@Override
 	public Boolean isDepartmentIdExists(int id) throws SQLException, ClassNotFoundException {
 		String sql = "SELECT * FROM Department WHERE DepartmentID = ?";
 		PreparedStatement preStatement = jdbc.createPrepareStatement(sql);
@@ -90,6 +95,8 @@ public class DepartmentDao {
 			return false;
 		}
 	}
+	
+	@Override
 	public boolean createDepartment(String name) throws ClassNotFoundException, SQLException {
 		isDepartmentNameExists(name);
 		String sql = "INSERT INTO Department (DepartmentName) VALUES (?);";
@@ -104,6 +111,8 @@ public class DepartmentDao {
 		}
 	}
 	
+	
+	@Override
 	public boolean updateDepartmentName(int id, String newName) throws ClassNotFoundException, SQLException {
 		if (isDepartmentIdExists(id) == false) {
 			return false;
@@ -125,6 +134,8 @@ public class DepartmentDao {
 		}
 		
 	}
+	
+	@Override
 	public boolean deleteDepartment(int id) throws ClassNotFoundException, SQLException {
 		if (isDepartmentIdExists(id) == false) {
 			return false;
