@@ -5,12 +5,13 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.vti.backend.datalayer.IPositionRepository;
 import com.vti.backend.datalayer.PositionRepository;
 import com.vti.entity.Position;
 
 public class PositionService implements IPositionService {
 
-	private PositionRepository positionRepository;
+	private IPositionRepository positionRepository;
 	
 	public PositionService() throws FileNotFoundException, IOException {
 		positionRepository = new PositionRepository();

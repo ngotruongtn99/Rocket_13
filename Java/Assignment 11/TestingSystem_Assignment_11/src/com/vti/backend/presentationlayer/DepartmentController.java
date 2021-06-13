@@ -6,10 +6,11 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.vti.backend.businesslayer.DepartmentService;
+import com.vti.backend.businesslayer.IDepartmentService;
 import com.vti.entity.Department;
 
 public class DepartmentController {
-	private DepartmentService departmentService;
+	private IDepartmentService departmentService;
 	
 	
 	public DepartmentController() throws FileNotFoundException, IOException {

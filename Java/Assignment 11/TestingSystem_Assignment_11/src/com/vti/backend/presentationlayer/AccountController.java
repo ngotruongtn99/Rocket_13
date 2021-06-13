@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import com.vti.backend.businesslayer.AccountService;
+import com.vti.backend.businesslayer.IAccountService;
 import com.vti.entity.Account;
 
 public class AccountController {
-	private AccountService accountService;
+	private IAccountService accountService;
 
 	public AccountController() throws FileNotFoundException, IOException {
 		accountService = new AccountService();

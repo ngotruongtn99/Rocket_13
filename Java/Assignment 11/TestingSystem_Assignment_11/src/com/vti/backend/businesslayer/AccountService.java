@@ -6,10 +6,11 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.vti.backend.datalayer.AccountRepository;
+import com.vti.backend.datalayer.IAccountRepository;
 import com.vti.entity.Account;
 
 public class AccountService implements IAccountService {
-	private AccountRepository accountRepository;
+	private IAccountRepository accountRepository;
 	
 	public AccountService() throws FileNotFoundException, IOException {
 		accountRepository = new AccountRepository();
