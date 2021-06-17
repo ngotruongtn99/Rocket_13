@@ -8,7 +8,6 @@ import java.util.List;
 import com.vti.backend.datalayer.AccountRepository;
 import com.vti.backend.datalayer.IAccountRepository;
 import com.vti.entity.Account;
-import com.vti.entity.Manager;
 
 public class AccountService implements IAccountService{
 	private IAccountRepository accountRepository;
@@ -17,10 +16,6 @@ public class AccountService implements IAccountService{
 		accountRepository = new AccountRepository();
 	}
 
-	@Override
-	public Boolean isAccountEmailExists(String email) throws ClassNotFoundException, SQLException {
-		return accountRepository.isAccountEmailExists(email);
-	}
 
 	@Override
 	public Boolean loginAccount(String email, String password) throws ClassNotFoundException, SQLException {
@@ -34,8 +29,8 @@ public class AccountService implements IAccountService{
 	}
 
 	@Override
-	public List<Manager> accountManagerInProject(int projectID)
+	public List<Account> accountManagerInProject()
 			throws ClassNotFoundException, SQLException, FileNotFoundException, IOException {
-		return accountRepository.accountManagerInProject(projectID);
+		return accountRepository.accountManagerInProject();
 	}
 }

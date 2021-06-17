@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vti.entity.Account;
-import com.vti.entity.Manager;
-import com.vti.entity.Project;
 import com.vti.ultis.jdbcUltis;
 
 public class AccountRepository implements IAccountRepository {
@@ -19,25 +17,10 @@ public class AccountRepository implements IAccountRepository {
 	public AccountRepository() throws FileNotFoundException, IOException {
 		jdbc = new jdbcUltis();
 	}
-	@Override
-	public Boolean isAccountEmailExists(String email) throws ClassNotFoundException, SQLException {
-		String sql = "SELECT * FROM Account WHERE Email = ?";
-		PreparedStatement preStatement = jdbc.createPrepareStatement(sql);
-		preStatement.setString(1, email);
-		ResultSet resultSet = preStatement.executeQuery();
-		if (resultSet.next()) {
-			jdbc.disConnection();
-			return true;
-		} else {
-			jdbc.disConnection();
-			return false;
-		}
-	
-	}
 
 	@Override
 	public Boolean loginAccount(String email, String password) throws ClassNotFoundException, SQLException {
-		String sql = "SELECT * FROM Account WHERE Email = ? AND password = ?";
+		String sql = "SELECT * FROM `user` WHERE email= ? AND `password` = ?";
 		PreparedStatement preparedStatement = jdbc.createPrepareStatement(sql);
 		preparedStatement.setString(1, email);
 		preparedStatement.setString(2, password);
@@ -53,7 +36,7 @@ public class AccountRepository implements IAccountRepository {
 
 	@Override
 	public List<Account> findAccountByProjectID(int projectID) throws ClassNotFoundException, SQLException, FileNotFoundException, IOException {
-		String sql = "SELECT * FROM vw_AccInProject WHERE ProjectID = ?";
+		String sql = "SELECT 	pau.projectId, u.`fullName`, u.`email`, pau.`Role` FROM	`ProjectAndUser` pau JOIN	`User` u	ON u.id = pau.userId WHERE	pau.projectId = ?;";
 		PreparedStatement preStatement = jdbc.createPrepareStatement(sql);
 		preStatement.setInt(1, projectID);
 		ResultSet resultSet = preStatement.executeQuery();
@@ -63,36 +46,23 @@ public class AccountRepository implements IAccountRepository {
 			acc.setId(resultSet.getInt(1));
 			acc.setFullname(resultSet.getNString(2));
 			acc.setEmail(resultSet.getString(3));
-			acc.setPassword(resultSet.getString(4));
-			acc.setPosition(resultSet.getString(5));
-			ProjectRepository projectRepository = new ProjectRepository();
-			Project project = projectRepository.getProjectByID(resultSet.getInt(6));
-			acc.setProject(project);
 			list.add(acc);
 		}
 		return list;
 	}
 
 	@Override
-	public List<Manager> accountManagerInProject(int projectID) throws ClassNotFoundException, SQLException, FileNotFoundException, IOException {
-		String sql = "SELECT a.id, a.FullName, a.Email, a.`password`, a.expInYear, a.ProjectID FROM `Account` a \r\n" + 
-				"INNER JOIN Project p ON a.ProjectID = p.ProjectID\r\n" + 
-				"WHERE Category = 'Manager' AND ProjectID = ?; ";
-		PreparedStatement preparedStatement = jdbc.createPrepareStatement(sql);
-		preparedStatement.setInt(1, projectID);
-		ResultSet resultSet = preparedStatement.executeQuery();
-		List<Manager> list = new ArrayList<Manager>();
+	public List<Account> accountManagerInProject() throws ClassNotFoundException, SQLException, FileNotFoundException, IOException {
+		String sql = "SELECT pau.projectId,u.`email`, u.`fullName`, pau.`Role` FROM	`ProjectAndUser` pau JOIN	`User` u	ON u.id = pau.userId WHERE	`Role` = 'MANAGER';";
+		
+		ResultSet resultSet = jdbc.executeQuery(sql);
+		List<Account> list = new ArrayList<Account>();
 		while (resultSet.next()) {
-			Manager manager = new Manager();
-			manager.setId(resultSet.getInt(1));
-			manager.setFullname(resultSet.getNString(2));
-			manager.setEmail(resultSet.getString(3));
-			manager.setPassword(resultSet.getString(4));
-			manager.setExpInYear(resultSet.getInt(5));
-			ProjectRepository projectRepository = new ProjectRepository();
-			Project project = projectRepository.getProjectByID(resultSet.getInt(6));
-			manager.setProject(project);
-			list.add(manager);
+			Account account = new Account();
+			account.setId(resultSet.getInt(1));
+			account.setEmail(resultSet.getString(2));
+			account.setFullname(resultSet.getString(3));
+			list.add(account);
 			
 		} 
 		return list;

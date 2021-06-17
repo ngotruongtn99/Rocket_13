@@ -10,7 +10,14 @@ public class Demo {
 	public static void main(String[] args)
 			throws FileNotFoundException, IOException, ClassNotFoundException, SQLException {
 		accountFunction accountFunction = new accountFunction();
-		accountFunction.Menu();
+		while (true) {
+			System.out.println("------MỜI BẠN LOGIN------");
+			if (accountFunction.islogin()) {
+				accountFunction.Menu();
+			} else {
+				System.out.println("Đã có lỗi xảy ra");
+			}
+		}
 		
 	}
 

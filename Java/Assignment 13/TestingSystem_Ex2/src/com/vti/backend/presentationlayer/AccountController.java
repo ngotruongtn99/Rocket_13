@@ -8,18 +8,12 @@ import java.util.List;
 import com.vti.backend.businesslayer.AccountService;
 import com.vti.backend.businesslayer.IAccountService;
 import com.vti.entity.Account;
-import com.vti.entity.Manager;
 
 public class AccountController {
 	private IAccountService accountService;
 	
 	public AccountController() throws FileNotFoundException, IOException {
 		accountService = new AccountService();
-	}
-	
-
-	public Boolean isAccountEmailExists(String email) throws ClassNotFoundException, SQLException {
-		return accountService.isAccountEmailExists(email);
 	}
 
 
@@ -34,8 +28,8 @@ public class AccountController {
 	}
 
 	
-	public List<Manager> accountManagerInProject(int projectID)
+	public List<Account> accountManagerInProject()
 			throws ClassNotFoundException, SQLException, FileNotFoundException, IOException {
-		return accountService.accountManagerInProject(projectID);
+		return accountService.accountManagerInProject();
 	}
 }
